@@ -4,8 +4,10 @@ import 'core-js/es/object/assign';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
+import Tableau from './components/Tableau';
 
 dotenv.config();
 
-// Render the main component into the dom
-ReactDOM.render(<App />, document.getElementById('root'));
+Tableau.init().then(() => {
+    ReactDOM.render(<App />, document.getElementById('root'));
+});

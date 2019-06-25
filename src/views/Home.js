@@ -1,30 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import API from '../components/API';
+import PostItem from './PostItem';
 
 // Declare this so our linter knows that tableau is a global object
-/* global tableau */
 
 const Home = props => {
-    const [count, setCount] = useState(0);
+    const [posts, setPosts] = useState([]);
 
     useEffect(() => {
-        tableau.extensions
-            .initializeAsync()
-            .then(() => API.getPosts())
-            .then(data => {
-                let dashboard = tableau.extensions.dashboardContent.dashboard;
-
-                document.getElementById('result').innerHTML = JSON.stringify(data);
+        Promise.all([API.getPosts(), API.getUsers()])
+            .then(([postsResponse, usersResponse]) => joinUserToPost(postsResponse, usersResponse))
+            .then(data => setPosts(data))
+            .catch(e => {
+                console.error(e);
             });
-    }, []);
+    }, [posts]);
 
     return (
         <div>
-            <h1>Count: {count}</h1>
-            <button onClick={() => setCount(count + 1)}>Click</button>
-            <p id='result' />
+            {posts.map(post => (
+                <PostItem key={post.id} post={post} user={post.user} />
+            ))}
         </div>
     );
 };
+
+function joinUserToPost(posts, users) {
+    return posts.map(post => ({ ...post, user: users.find(user => user.id === post.userId) }));
+}
 
 export default Home;

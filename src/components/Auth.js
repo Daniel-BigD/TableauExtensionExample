@@ -1,4 +1,5 @@
 import auth0 from 'auth0-js';
+import Tableau from './Tableau';
 
 const Auth = () => {
     const Client = new auth0.WebAuth({
@@ -25,12 +26,18 @@ const Auth = () => {
                 const keys = Object.getOwnPropertyNames(authResult);
 
                 keys.forEach(key => {
-                    if (authResult[key] !== null) {
+                    if (key !== 'idTokenPayload' && authResult[key] !== null) {
                         localStorage.setItem(key, authResult[key]);
+                        Tableau.setSetting(key, authResult[key]);
+                    } else if (key === 'idTokenPayload') {
+                        localStorage.setItem(key, JSON.stringify(authResult[key]));
+                        Tableau.setSetting(key, JSON.stringify(authResult[key]));
                     }
                 });
 
                 window.location.hash = '';
+
+                return Tableau.saveSettings();
             });
         },
         getCredentials: () => {
